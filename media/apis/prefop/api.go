@@ -5,6 +5,7 @@ package prefop
 
 import (
 	"encoding/json"
+
 	credentials "github.com/qiniu/go-sdk/v7/storagev2/credentials"
 	errors "github.com/qiniu/go-sdk/v7/storagev2/errors"
 )
@@ -32,29 +33,31 @@ type Response struct {
 
 // 返回的持久化数据处理任务中的云处理操作状态
 type PfopTaskItem struct {
-	Command     string // 云操作命令
-	Code        int64  // 云操作状态码
-	Description string // 与状态码相对应的详细描述
-	Error       string // 如果处理失败，该字段会给出失败的详细原因
-	Hash        string // 云处理结果保存在服务端的唯一标识
-	ObjectName  string // 云处理结果的外链对象名称
-	ReturnOld   int64  // 是否返回了旧的数据
+	Command     string   // 云操作命令
+	Code        int64    // 云操作状态码
+	Description string   // 与状态码相对应的详细描述
+	Error       string   // 如果处理失败，该字段会给出失败的详细原因
+	Hash        string   // 云处理结果保存在服务端的唯一标识
+	ObjectName  string   // 云处理结果的外链对象名称
+	ObjectNames []string // 云处理结果的外链对象名称列表，当有多个结果时使用
+	ReturnOld   int64    // 是否返回了旧的数据
 }
 type jsonPfopTaskItem struct {
-	Command     string `json:"cmd"`             // 云操作命令
-	Code        int64  `json:"code"`            // 云操作状态码
-	Description string `json:"desc"`            // 与状态码相对应的详细描述
-	Error       string `json:"error,omitempty"` // 如果处理失败，该字段会给出失败的详细原因
-	Hash        string `json:"hash"`            // 云处理结果保存在服务端的唯一标识
-	ObjectName  string `json:"key"`             // 云处理结果的外链对象名称
-	ReturnOld   int64  `json:"returnOld"`       // 是否返回了旧的数据
+	Command     string   `json:"cmd"`             // 云操作命令
+	Code        int64    `json:"code"`            // 云操作状态码
+	Description string   `json:"desc"`            // 与状态码相对应的详细描述
+	Error       string   `json:"error,omitempty"` // 如果处理失败，该字段会给出失败的详细原因
+	Hash        string   `json:"hash"`            // 云处理结果保存在服务端的唯一标识
+	ObjectName  string   `json:"key"`             // 云处理结果的外链对象名称
+	ObjectNames []string `json:"keys,omitempty"`  // 云处理结果的外链对象名称列表，当有多个结果时使用
+	ReturnOld   int64    `json:"returnOld"`       // 是否返回了旧的数据
 }
 
 func (j *PfopTaskItem) MarshalJSON() ([]byte, error) {
 	if err := j.validate(); err != nil {
 		return nil, err
 	}
-	return json.Marshal(&jsonPfopTaskItem{Command: j.Command, Code: j.Code, Description: j.Description, Error: j.Error, Hash: j.Hash, ObjectName: j.ObjectName, ReturnOld: j.ReturnOld})
+	return json.Marshal(&jsonPfopTaskItem{Command: j.Command, Code: j.Code, Description: j.Description, Error: j.Error, Hash: j.Hash, ObjectName: j.ObjectName, ObjectNames: j.ObjectNames, ReturnOld: j.ReturnOld})
 }
 func (j *PfopTaskItem) UnmarshalJSON(data []byte) error {
 	var nj jsonPfopTaskItem
@@ -67,6 +70,7 @@ func (j *PfopTaskItem) UnmarshalJSON(data []byte) error {
 	j.Error = nj.Error
 	j.Hash = nj.Hash
 	j.ObjectName = nj.ObjectName
+	j.ObjectNames = nj.ObjectNames
 	j.ReturnOld = nj.ReturnOld
 	return nil
 }
